@@ -10,14 +10,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.Random;
 
 public class Generate1 {
-	//private ArrayList<CodeInt> codes;
-	private Queue<CodeInt> codes;
+	private ArrayList<CodeInt> codes;
+	//private Queue<CodeInt> codes;
 	private ArrayList<String> codesString;
 	
 	CodeInt fistCode;
@@ -41,8 +39,8 @@ public class Generate1 {
 		this.digQty = digQty;
 		this.codQty = codQty;
 		
-		//codes = new ArrayList<CodeInt>();
-		codes = new LinkedList<CodeInt>();
+		codes = new ArrayList<CodeInt>();
+		//codes = new LinkedList<CodeInt>();
 		
 		rand = new Random();
 		
@@ -70,8 +68,7 @@ public class Generate1 {
 			tmp = (CodeInt) fistCode.clone();
 
 			for(int i = 0 ; i < codQty ; i++) {
-				if (codes.add((CodeInt) tmp.clone()))
-					System.out.println("existente");
+				codes.add((CodeInt) tmp.clone());
 				if (delta >= l)
 					tmp.add(delta + rand.nextInt(l) - (l/2));
 				else
@@ -123,8 +120,8 @@ public class Generate1 {
 			for (int i = 0 ; i < codes.size() ; i++) {
 				//s = codesString.get(i);
 				s = "";
-				//idxs = codes.get(i).getInfo().clone();
-				idxs = codes.poll().getInfo().clone();
+				idxs = codes.get(i).getInfo().clone();
+				//idxs = codes.poll().getInfo().clone();
 				for(int j = 0 ; j < digQty ; j++) {
 					s += opciones.get(idxs[j]);
 				}
@@ -265,7 +262,6 @@ public class Generate1 {
 			
 			System.out.println("Tiempo Total:\t" + (end - start) + " ms");
 			System.out.println();
-			System.out.println(g.rand.nextLong());
 			System.out.println("PROCESO FINALIZADO");
 			//System.out.println();
 			//System.in.read();
