@@ -10,12 +10,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.Random;
 
 public class Generate1 {
-	private ArrayList<CodeInt> codes;
-	//private Queue<CodeInt> codes;
+	private Queue<CodeInt> codes;
 	private ArrayList<String> codesString;
 	
 	CodeInt fistCode;
@@ -39,8 +40,7 @@ public class Generate1 {
 		this.digQty = digQty;
 		this.codQty = codQty;
 		
-		codes = new ArrayList<CodeInt>();
-		//codes = new LinkedList<CodeInt>();
+		codes = new LinkedList<CodeInt>();
 		
 		rand = new Random();
 		
@@ -120,8 +120,7 @@ public class Generate1 {
 			for (int i = 0 ; i < codes.size() ; i++) {
 				//s = codesString.get(i);
 				s = "";
-				idxs = codes.get(i).getInfo().clone();
-				//idxs = codes.poll().getInfo().clone();
+				idxs = codes.poll().getInfo().clone();
 				for(int j = 0 ; j < digQty ; j++) {
 					s += opciones.get(idxs[j]);
 				}
