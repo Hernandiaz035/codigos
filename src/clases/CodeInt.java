@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Random;
 
 public class CodeInt implements Comparable<CodeInt> , Cloneable{
 	
@@ -11,6 +13,19 @@ public class CodeInt implements Comparable<CodeInt> , Cloneable{
 	
 	private int digQty;
 	private int l;
+	private Long priority;
+	
+	private Random rand;
+	
+
+	public static Comparator<CodeInt> compCodeInt =  new Comparator<CodeInt>() {
+		@Override
+		public int compare(CodeInt o1, CodeInt o2) {
+			int comp = o1.getPriority().compareTo(o2.getPriority());
+			return (comp == 0) ? o1.compareTo(o2) : comp;
+		}
+		
+	};
 	
 	public static void main(String[] args) {
 		int l = 5;
@@ -80,6 +95,12 @@ public class CodeInt implements Comparable<CodeInt> , Cloneable{
 	public void setInfo(Integer[] info) {
 		this.info = info;
 	}
+	
+	public void setInfo(CodeInt tmp) {
+		this.info = tmp.getInfo();
+		this.digQty = this.info.length;
+		this.l = tmp.getL();
+	}
 
 
 	public int getDigQty() {
@@ -101,11 +122,21 @@ public class CodeInt implements Comparable<CodeInt> , Cloneable{
 		this.l = l;
 	}
 
+	public Long getPriority() {
+		return priority;
+	}
+
+
+	public void setPriority(Long priority) {
+		this.priority = priority;
+	}
+
 
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		// TODO Auto-generated method stub
 		CodeInt newClone = new CodeInt(info.clone(), l);
+		newClone.setPriority(priority);
 		
 		return newClone;
 	}
@@ -137,13 +168,32 @@ public class CodeInt implements Comparable<CodeInt> , Cloneable{
 		this.digQty = info.length;
 		this.l = l;
 		
-		this.add(0);
+		rand = new Random();
+		this.priority = 0L;
+	}
+
+	public CodeInt(CodeInt c, long a) {
+		super();
+		this.info = c.getInfo().clone();
+		this.digQty = this.info.length;
+		this.l = c.getL();
+		
+		rand = new Random();
+		this.priority = 0L;
+		
+		this.add(a);
+	}
+	
+	public void randPriority() {
+		this.priority = rand.nextLong();
 	}
 
 	public void add(Integer b) {
 		// Este metodo suma en la base que corresponda a traves de la cant de opciones
 		Integer newVal;
-		for (int i = 1; i <= digQty ; i++) {
+		//for (int i = 1; i <= digQty ; i++) {
+		int i = 0;
+		while(++i <= digQty || b != 0) {
 			newVal = Math.floorMod(this.info[digQty - i] + b , l);
 			
 			b = Math.floorDiv((this.info[digQty - i] + b)  , l);
@@ -154,7 +204,9 @@ public class CodeInt implements Comparable<CodeInt> , Cloneable{
 	public void add(Long b) {
 		// Este metodo suma en la base que corresponda a traves de la cant de opciones
 		Long newVal;
-		for (int i = 1; i <= digQty ; i++) {
+		//for (int i = 1; i <= digQty ; i++) {
+		int i = 0;
+		while(++i <= digQty || b != 0L) {
 			newVal = Math.floorMod(this.info[digQty - i] + b , l);
 			
 			b = Math.floorDiv((this.info[digQty - i] + b)  , l);

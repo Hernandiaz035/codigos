@@ -1,5 +1,6 @@
 package clases;
 
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,15 +12,18 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.Random;
 
 public class Generate1 {
-	private Queue<CodeInt> codes;
-	private ArrayList<String> codesString;
+	//private Queue<CodeInt> codes;
+	private PriorityQueue<CodeInt> codes;
+	//private ArrayList<String> codesString;
+	private Queue<String> codesString;
 	
-	CodeInt fistCode;
+	CodeInt firstCode;
 	
 	private ArrayList<String> opciones;
 	private int digQty; // 'cifras' del codigo
@@ -40,11 +44,12 @@ public class Generate1 {
 		this.digQty = digQty;
 		this.codQty = codQty;
 		
-		codes = new LinkedList<CodeInt>();
+		//codes = new LinkedList<CodeInt>();
+		codes = new PriorityQueue<CodeInt>(CodeInt.compCodeInt);
 		
 		rand = new Random();
 		
-		codesString = new ArrayList<String>();
+		codesString = new LinkedList<String>();
 
 		n = (long) Math.pow((double)l, (double)digQty);
 		//n = CodeInt.permutation(l, digQty);
@@ -54,46 +59,44 @@ public class Generate1 {
 		Integer[] a = new Integer[digQty];
 		for (int i = 0; i < a.length ; i++)
 			a[i] = 0;
-		fistCode = new CodeInt(a, l);
+		firstCode = new CodeInt(a, l);
 		long iniPos = (delta/2);// + rand.nextLong(delta / 2L);
-		fistCode.add(iniPos);
+		firstCode.add(iniPos);
 		
 		if (codQty > n)
 			System.out.println("Unreacheable Quantity!!!");
 	}
 	
-	public void generateCodes() {
-		CodeInt tmp;
-		try {
-			tmp = (CodeInt) fistCode.clone();
-
-			for(int i = 0 ; i < codQty ; i++) {
-				codes.add((CodeInt) tmp.clone());
-				if (delta >= l)
-					tmp.add(delta + rand.nextInt(l) - (l/2));
-				else
-					tmp.add(delta);
-			}
-		} catch (CloneNotSupportedException e) {
-			
+	public void generateCodes(boolean randomize) throws CloneNotSupportedException {
+		codes.add(firstCode);
+		CodeInt tmp = (CodeInt) firstCode.clone();
+		long acum = 0;
+		while(codes.size() < codQty) {
+			if (delta >= l)
+				acum = delta + rand.nextInt(l) - (l/2);
+			else
+				acum = delta;
+			tmp.add(acum);
+			if (randomize)
+				tmp.randPriority();
+			//codes.add(new CodeInt(tmp,acum));
+			//codes.add(new CodeInt(tmp, 0L));
+			codes.add((CodeInt) tmp.clone());
 		}
 	}
 	
 	public void codesToString() {
-		String codeString = new String();
+		String tmpString;
+		CodeInt tmpCode;
 		Integer[] idxs;
-		for (CodeInt c : codes) {
-			codeString = "";
-			idxs = c.getInfo().clone();
-			for(int i = 0 ; i < digQty ; i++) {
-				codeString += opciones.get(idxs[i]);
-			}
-			this.codesString.add(codeString);
+		while(!codes.isEmpty()) {
+			tmpCode = codes.poll();
+			idxs = tmpCode.getInfo();
+			tmpString = "";
+			for(int i = 0 ; i < digQty ; i++)
+				tmpString += opciones.get(idxs[i]);
+			this.codesString.add(tmpString);
 		}
-	}
-	
-	public void shuffleCodes() {
-		//Collections.shuffle(codes);
 	}
 	
 	public void shuffleChar() {
@@ -101,38 +104,27 @@ public class Generate1 {
 	}
 	
 	public void writeCodes(String fileName) {
-		//File file = new File(fileName);
 		try {
-			//file.createNewFile();
-			//FileWriter writer = new FileWriter(file);
-			BufferedWriter writer= new BufferedWriter(new FileWriter(fileName) , 8*1024);
+			FileWriter writer = new FileWriter(fileName);
+			//BufferedWriter writer= new BufferedWriter(new FileWriter(fileName) /*, 8*1024*/);
 
 			double printRate = 0.05;
 			
-			int deltaPrint = (int) ((float)codes.size() * printRate);
+			int deltaPrint = (int) ((float)codesString.size() * printRate);
 			
 			deltaPrint = (deltaPrint > 0)?deltaPrint:1;
 
-			Integer[] idxs;
-			String s = "";
+			long i = 0;
 			
 			int iPrint = 0;
-			for (int i = 0 ; i < codes.size() ; i++) {
-				//s = codesString.get(i);
-				s = "";
-				idxs = codes.poll().getInfo().clone();
-				for(int j = 0 ; j < digQty ; j++) {
-					s += opciones.get(idxs[j]);
-				}
-				s += "\r\n";
-				writer.write(s);
-				
-				if (Math.floorMod(i, deltaPrint) == 0)
+			
+			while(!codesString.isEmpty()) {
+				writer.write(codesString.poll() + "\r\n");
+
+				if (Math.floorMod(i++, deltaPrint) == 0)
 					System.out.println("\tEscribiendo...\t" + ((float)iPrint++ * 100.0 * printRate) + "%");
 			}
-			//writer.write(s);
 			System.out.println("\tEscribiendo...\t" + 100.0 + "  %");
-			
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -140,25 +132,26 @@ public class Generate1 {
 	}
 	
 	public static void test() {
-		/*Character[] opciones = {'A' , 'C' , 'E' , 'F' , 'H', 'J' , 'K' , 'L' , 'N' , 'P' , 'Q' , 'R' ,
-		'T' , 'V' , 'W' , 'X' , 'Y' , 'Z' , '1' , '2' , '3' , '4' , '7' , '8' , '9'};*/
 		String[] opciones = {"A" , "C" , "E" , "F" , "H", "J" , "K" , "L" , "N" , "P" , "Q" , "R" ,
 				"T" , "V" , "W" , "X" , "Y" , "Z" , "1" , "2" , "3" , "4" , "7" , "8" , "9"};
-		/*char[] opciones = {'A','B','C'};*/
 		
 		Generate1 g = new Generate1(opciones, 6, 1000000);
 		
-		System.out.println(g.n);
 		System.out.println(g.codQty);
+		System.out.println(g.n);
 		System.out.println(g.delta);
 		long start , end;
 		
 		start = System.currentTimeMillis();
 		
-		g.generateCodes();
+		try {
+			g.generateCodes(false);
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
 		System.out.println("Generated Codes");
-		g.shuffleCodes();
-		System.out.println("Shuffled Codes");
+		
+		g.codesToString();
 		
 		g.writeCodes("C:\\Users\\Felipe\\Desktop\\test.txt");
 		System.out.println("File Writen !!!");
@@ -207,17 +200,13 @@ public class Generate1 {
 			
 			File f = new File("./Codigos/");
 			
-			if(!f.exists()) {
+			if(!f.exists())
 				f.mkdirs();
-			}
-			
-			
 			
 			Generate1 g = new Generate1(opciones, digQty, codQty);
 			
 			System.out.println("Cantidad Posible de Codigos:\t" + g.n);
 			System.out.println("Separacion entre Codigos:\t" + g.delta);
-			//System.out.println("Separacion entre Codigos:\t" + (int) g.delta);
 
 			System.out.println();
 			
@@ -235,19 +224,17 @@ public class Generate1 {
 			
 			System.out.println("Generando Codigos...");
 			tempStart  = System.currentTimeMillis();
-			g.generateCodes();
+			g.generateCodes(shuffleCodes);
 			tempEnd = System.currentTimeMillis();
 			System.out.println("[" + (tempEnd - tempStart) + " ms]");
 			System.out.println();
 			
-			if (shuffleCodes) {
-				System.out.println("Aplicando Shuffle a Codigos...");
-				tempStart  = System.currentTimeMillis();
-				g.shuffleCodes();
-				tempEnd = System.currentTimeMillis();
-				System.out.println("[" + (tempEnd - tempStart) + " ms]");
-				System.out.println();
-			}
+			System.out.println("Codificando Codigos...");
+			tempStart  = System.currentTimeMillis();
+			g.codesToString();
+			tempEnd = System.currentTimeMillis();
+			System.out.println("[" + (tempEnd - tempStart) + " ms]");
+			System.out.println();
 			
 			String fileName = "./Codigos/Codigos(" + dFormat.format(dt) + ").txt"; 
 			System.out.println("Escribiendo Codigos...");
@@ -262,15 +249,18 @@ public class Generate1 {
 			System.out.println("Tiempo Total:\t" + (end - start) + " ms");
 			System.out.println();
 			System.out.println("PROCESO FINALIZADO");
-			//System.out.println();
-			//System.in.read();
-			
-			//System.out.println("Enter Para Continuar...");
-			System.in.read();
-			System.in.read();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			System.in.read();
+			System.in.read();
+		} catch (IOException e) {
+			
 		}
 	}
 }
